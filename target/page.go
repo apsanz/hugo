@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"path/filepath"
+	"path"
 
 	"github.com/spf13/hugo/helpers"
 	"github.com/spf13/hugo/hugofs"
@@ -34,23 +34,23 @@ func (pp *PagePub) Publish(path string, r io.Reader) (err error) {
 func (pp *PagePub) Translate(src string) (dest string, err error) {
 	if src == "/" {
 		if pp.PublishDir != "" {
-			return filepath.Join(pp.PublishDir, "index.html"), nil
+			return path.Join(pp.PublishDir, "index.html"), nil
 		}
 		return "index.html", nil
 	}
 
-	dir, file := filepath.Split(src)
-	ext := pp.extension(filepath.Ext(file))
+	dir, file := path.Split(src)
+	ext := pp.extension(path.Ext(file))
 	name := filename(file)
 	if pp.PublishDir != "" {
-		dir = filepath.Join(pp.PublishDir, dir)
+		dir = path.Join(pp.PublishDir, dir)
 	}
 
 	if pp.UglyUrls || file == "index.html" {
-		return filepath.Join(dir, fmt.Sprintf("%s%s", name, ext)), nil
+		return path.Join(dir, fmt.Sprintf("%s%s", name, ext)), nil
 	}
 
-	return filepath.Join(dir, name, fmt.Sprintf("index%s", ext)), nil
+	return path.Join(dir, name, fmt.Sprintf("index%s", ext)), nil
 }
 
 func (pp *PagePub) extension(ext string) string {

@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/spf13/afero"
 )
 
@@ -366,14 +367,14 @@ func TestAbsPathify(t *testing.T) {
 		input, expected string
 	}
 	data := []test{
-		{os.TempDir(), path.Clean(os.TempDir())}, // TempDir has trailing slash
+		{os.TempDir(), filepath.Clean(os.TempDir())}, // TempDir has trailing slash
 		{"/banana/../dir/", "/dir"},
 	}
 
 	for i, d := range data {
 		expected := AbsPathify(d.input)
 		if d.expected != expected {
-			t.Errorf("Test %d failed. Expected %q but go %q", i, d.expected, expected)
+			t.Errorf("Test %d failed. Expected %q but got %q", i, d.expected, expected)
 		}
 	}
 }
@@ -479,7 +480,15 @@ func TestPathPrep(t *testing.T) {
 }
 
 func TestPrettifyPath(t *testing.T) {
-
+	assert.Equal(t, filepath.FromSlash("/section/name/index.html"), PrettifyPath("/section/name.html"))
+	assert.Equal(t, filepath.FromSlash("/section/sub/name/index.html"), PrettifyPath("/section/sub/name.html"))
+	assert.Equal(t, filepath.FromSlash("/section/name/index.html"), PrettifyPath("/section/name/"))
+	assert.Equal(t, filepath.FromSlash("/section/name/index.html"), PrettifyPath("/section/name/index.html"))
+	assert.Equal(t, filepath.FromSlash("/index.html"), PrettifyPath("/index.html"))
+	assert.Equal(t, filepath.FromSlash("/name/index.xml"), PrettifyPath("/name.xml"))
+	assert.Equal(t, filepath.FromSlash("name/index.xml"), PrettifyPath("name.xml"))
+	assert.Equal(t, filepath.FromSlash("/"), PrettifyPath("/"))
+	assert.Equal(t, filepath.FromSlash("/"), PrettifyPath(""))
 }
 
 func TestFindCWD(t *testing.T) {

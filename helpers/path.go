@@ -132,7 +132,7 @@ func AbsPathify(inPath string) string {
 		return filepath.Clean(inPath)
 	}
 
-	return filepath.Clean(filepath.Join(viper.GetString("WorkingDir"), inPath))
+	return filepath.ToSlash(filepath.Clean(filepath.Join(viper.GetString("WorkingDir"), inPath)))
 }
 
 func MakeStaticPathRelative(inPath string) (string, error) {
@@ -179,7 +179,7 @@ func FileAndExt(in string) (name string, ext string) {
 	// 3. any "base" consisting of just an empty string
 	// 4. any "base" consisting of just the current directory i.e. "."
 	// 5. any "base" consisting of just the parent directory i.e. ".."
-	if (strings.LastIndex(in, string(os.PathSeparator)) == len(in)-1) || base == "" || base == "." || base == ".." || base == string(os.PathListSeparator) {
+	if (strings.LastIndex(in, string(os.PathSeparator)) == len(in)-1) || (strings.LastIndex(in, "/") == len(in)-1) || base == "" || base == "." || base == ".." || base == string(os.PathListSeparator) {
 		name = "" // there is NO filename
 	} else if ext != "" { // there was an Extension
 		// return the filename minus the extension (and the ".")
@@ -189,7 +189,7 @@ func FileAndExt(in string) (name string, ext string) {
 		// be the filename
 		name = base
 	}
-	return
+	return name, ext
 }
 
 func GetRelativePath(path, base string) (final string, err error) {
@@ -256,7 +256,7 @@ func PrettifyPath(in string) string {
 	if filepath.Ext(in) == "" {
 		// /section/name/  -> /section/name/index.html
 		if len(in) < 2 {
-			return "/"
+			return string(os.PathSeparator)
 		}
 		return filepath.Join(filepath.Clean(in), "index.html")
 	} else {
